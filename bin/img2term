@@ -1,0 +1,141 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
+
+use Image::Term256Color;
+use Getopt::Long;
+use Pod::Usage;
+use GD::Image;
+
+my $options = {};
+GetOptions( "scale=f" => \$options->{scale_r}, 
+            "x_scale=i" => \$options->{scale_x},
+            "no_scale" => \$options->{no_scale}
+          );
+
+my $max_width = `tput cols`;
+
+sub print_usage {
+  pod2usage( { -message => $_[0] , -exitval => 1 , -verbose => 0 } );
+}
+
+sub proc_print {
+  my $input = shift;
+
+  my $ascii;
+
+  if( $options->{scale_r} ){
+    $ascii = Image::Term256Color::convert( $input , { scale_ratio => $options->{scale_r} } );
+  } elsif( $options->{scale_x} ){
+    $ascii = Image::Term256Color::convert( $input , { scale_x => $options->{scale_x} } );
+  } elsif( $options->{no_scale} ){
+    $ascii = Image::Term256Color::convert( $input ); 
+  } else {
+    my $image = GD::Image->new($input);
+    if( !$image ){
+      print_usage("Error: Invalid image data or file.\n");
+    }
+
+    my ( $width, $height ) = $image->getBounds();
+    if( $width > $max_width ){
+      $max_width = sprintf("%u" , ($max_width / 2));
+      
+      $ascii = Image::Term256Color::convert( $image->gd2() , { scale_x => $max_width } ); 
+    } else {
+      $ascii = Image::Term256Color::convert( $image->gd2() ); 
+    }
+      
+  }
+  
+  if( !$ascii ){
+    print_usage("Error: Invalid image data or file.\n");
+  }
+
+  print $ascii . "\n";
+}
+
+if( -t STDIN and not @ARGV ){
+  print_usage();
+
+} elsif( ! -t STDIN ){
+  # proc STDIN
+  my $ninput = join('', <STDIN>);
+
+  proc_print($ninput);
+
+} else {
+
+  # test args as valid files and proc them
+  foreach my $file ( @ARGV ){
+    if( ! -f $file ){
+      print_usage( "Did not provide a valid file.\n" );
+    } else {
+      proc_print($file);
+    }
+  }
+
+}
+
+exit 0;
+
+__END__
+ 
+=head1 NAME
+ 
+img2term - Display images in your 256 color terminal (kinda)
+ 
+=head1 SYNOPSIS
+ 
+img2term [options] [file...]
+ 
+ Options:
+   --help|-h            brief help message
+   --scale|-s           scale image by the given ratio
+   --x_scale|-x         scale image to x 'pixels' wide
+   --no_scale|-n        do not scale the image at all
+
+Image data can be piped to STDIN in place of providing a file.
+
+Images larger than the current terminal in columns will be
+automatically scaled to fit unless specified.
+ 
+=head1 OPTIONS
+ 
+=over 8
+ 
+=item <b>--help|-h</b>
+ 
+Prints a brief help message and exits.
+ 
+=item <b>--scale|-s</b>
+ 
+Scales the provided image by the provided decimal ratio before
+printing.  Superscedes --x_scale.
+ 
+=item <b>--x_scale|-x</b>
+ 
+Scales the provided image width to match the provided integer
+in 'pixels'.  Scales the image height proportionally.
+Superscedes --no_scale.
+
+=item <b>--no_scale|-n</b>
+
+Disables automatic scaling of the provided image data.
+ 
+=back
+ 
+=head1 DESCRIPTION
+ 
+img2term is a part of the L<Image::Term256Color> distribution and
+acts as a thin wrapper around the module to display image data on
+256 color terminals.
+
+=head1 EXAMPLES
+
+Display a classy octocat:
+
+    curl http://octodex.github.com/images/class-act.jpg | img2term | less -R
+ 
+=cut
+
