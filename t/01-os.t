@@ -3,7 +3,7 @@
 use Test::More tests => 1;
 
 BEGIN {
-  ok( $^O !~ /Win/i , "OS isn't Windows") or BAIL_OUT("Right now this only works on Unix-like oses");
+  ok( $^O !~ /MSWin32/ , "OS isn't Windows") or BAIL_OUT("Right now this only works on Unix-like oses");
 }
 
 $ENV{'PATH'} = '/bin:/usr/bin:/usr/local/bin';
