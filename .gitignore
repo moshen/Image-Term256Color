@@ -1,6 +1,8 @@
 blib*
 Makefile
 Makefile.old
+META*
+MYMETA*
 Build
 Build.bat
 _build*
