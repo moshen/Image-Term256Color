@@ -17,7 +17,7 @@ Version 0.01
 
 =cut
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 package Image::Term256Color;
 
@@ -166,7 +166,9 @@ foreach my $k ( keys( %{$termcolors} )){
 =head2 convert 
 
 =head4 Image::Term256Color::convert( $filename , \%options );
+
 =head4 Image::Term256Color::convert( *FILEHANDLE , \%options );
+
 =head4 Image::Term256Color::convert( $data , \%options );
 
 Accepts a $filename , *FILEHANDLE or scalar containing image data for PNG ,
