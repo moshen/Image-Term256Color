@@ -104,22 +104,22 @@ automatically scaled to fit unless specified.
  
 =over 8
  
-=item <b>--help|-h</b>
+=item --help|-h
  
 Prints a brief help message and exits.
  
-=item <b>--scale|-s</b>
+=item --scale|-s
  
 Scales the provided image by the provided decimal ratio before
 printing.  Superscedes --x_scale.
  
-=item <b>--x_scale|-x</b>
+=item --x_scale|-x
  
 Scales the provided image width to match the provided integer
 in 'pixels'.  Scales the image height proportionally.
 Superscedes --no_scale.
 
-=item <b>--no_scale|-n</b>
+=item --no_scale|-n
 
 Disables automatic scaling of the provided image data.
  

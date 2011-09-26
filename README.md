@@ -43,7 +43,11 @@ within the image.  Unlike scalar context, there are no newlines.
 
 
 Using the included img2term script:
-<img src="http://i.imgur.com/8sLut.png">
+
+    curl http://octodex.github.com/images/original.jpg | img2term -x=40
+
+Results in something like:
+![Termcat](http://i.imgur.com/uF2f8.png)
 
 ## SUPPORT AND DOCUMENTATION
 
