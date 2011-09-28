@@ -47,6 +47,7 @@ Using the included img2term script:
     curl http://octodex.github.com/images/original.jpg | img2term -x=40
 
 Results in something like:
+
 ![Termcat](http://i.imgur.com/uF2f8.png)
 
 ## SUPPORT AND DOCUMENTATION
