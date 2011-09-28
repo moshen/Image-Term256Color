@@ -13,7 +13,7 @@ Image::Term256Color - Display images in your 256 color terminal! (kinda)
 
 =head1 VERSION
 
-Version 0.01
+Version 0.03
 
 =cut
 
