@@ -19,9 +19,6 @@ Version 0.01
 
 our $VERSION = '0.02';
 
-package Image::Term256Color;
-
-
 =head1 SYNOPSIS
 
 Converts an image to 256 color terminal displayable ascii.  Mostly for fun.
