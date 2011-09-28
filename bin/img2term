@@ -15,6 +15,7 @@ GetOptions( "scale=f" => \$options->{scale_r},
           );
 
 my $max_width = `tput cols`;
+$max_width = sprintf("%u" , ($max_width / 2));
 
 sub print_usage {
   pod2usage( { -message => $_[0] , -exitval => 1 , -verbose => 0 } );
@@ -39,8 +40,6 @@ sub proc_print {
 
     my ( $width, $height ) = $image->getBounds();
     if( $width > $max_width ){
-      $max_width = sprintf("%u" , ($max_width / 2));
-      
       $ascii = Image::Term256Color::convert( $image->gd2() , { scale_x => $max_width } ); 
     } else {
       $ascii = Image::Term256Color::convert( $image->gd2() ); 
