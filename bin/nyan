@@ -1,0 +1,364 @@
+#!/usr/bin/env perl
+use warnings;
+use strict;
+
+# Animation frames... they are base64 encoded PNGs... I know, ridiculous.
+#  But we want the animation to be as large as possible right?
+my $frames = [ q(
+iVBORw0KGgoAAAANSUhEUgAAASwAAACMBAMAAAA0OIkcAAAAAXNSR0IArs4c6QAAACpQTFRF////
+//8A/8yZM/8A/5n//5mZ/5kAmZmZAJn//zOZZjP//wAAADNmAAAArpS1RQAAAAFiS0dEAIgFHUgA
+AAAJcEhZcwAACxMAAAsTAQCanBgAAAJNSURBVHhe7dshT8NAGMbxkwgQhAQ3M48gMxgcZh9gQWMw
+hAQ31YQEQ0hwmDk0AYsBEjRsAkJSw30Xurvd9a59L9e3YV2bPX/D0r67/jBbu3Vi2spEbGA1gcUJ
+LE7/y5LcQguBRRVaCCyq0EJtZ32+kL3ST6Om36Tsc5Pyl1wfLCqwOAVZxPp1ykzf5lhHVTLDe6QM
+LD+wwKqYZZWOP5lMzIM7QgYWWJHWjPV8SnZGK0rT54pVgMQDC6zGWZSlRh1gBVIXhj/qoYUb1qxw
+1QgWWLaOsrKDjuclRqZTrKxU7cxlYIFlWzPWyTbZblBhU3M9mjU0rwSGpWU+KzV7wAKrARatidVr
+LcuuJOVXkGVzWOZZOmsCCyxVe1nSk0mfVfoYxGcFAgsssHYGZPs0K5uWuSwpsZyya8JKJt1CBlal
+wKrDojUVailrUJRpFvUJpcO6EGKriHS3gQWWCixmMi980uywkvw/0YrU3wYWWKaWslSHNGtozlH1
+QUfzjseh1O5RkXVwTXZFQ/zpW7DA6g6L1rC7Vaw+/bbosxLnxUD9TdTLBFhg0YHFybKoW7iszChK
+pcY51YEFlq1h1qUQG5ER854oI7fx+18NlMpNLuvmgeyeZvnTT2DpwOoCi9Zw8r9srt3UDaxIYHFa
+M1ZiVpf5Wad/X/DMf08OzoEFlq5JlhCFPaUNtqWyHgvbhf756YfZ77PcaZnnbyBuz1/cvOyPUrfx
+gzUPrGWwypvaEFicwOIEFiewOIHFKcZ6F2IzMrKMwOIEFqeOslYUWJz+AMFFjCyo9dS3AAAAAElF
+TkSuQmCC
+), q(
+iVBORw0KGgoAAAANSUhEUgAAASwAAACMBAMAAAA0OIkcAAAAAXNSR0IArs4c6QAAACpQTFRF////
+//8A/8yZM/8A/5n//5mZ/5kAmZmZAJn//zOZZjP//wAAADNmAAAArpS1RQAAAAFiS0dEAIgFHUgA
+AAAJcEhZcwAACxMAAAsTAQCanBgAAAJmSURBVHhe7duhT8NAFMfxagKCkOBm8BNkBoPDTCAJGoMh
+JBgyVYUhJDjMHJIsm8UACRo2Q0hmuP+F9dq7vvberX3rYC38voa1vd19TLe1KcG4lgVFA1YTWJLA
+krRclpLmmwgsLt9EYHH5Jqo76/2J7Zl/Gzf6RakdaUp9sfODxQWWJC+LmX+RZqYPs9ZBmczgNisD
+KxtYYJXMspz1+/2+eXHHyMACq6B/xno8ZTvjFc7oc83KQYoDC6xfZ3GWBSrFOtQXYZ9kD2FN6BXa
+T7C8WZaFg+UPrKTmspSa9qJCcjIa1sQcTGRggWVrPiuWEZYiR/Ksk022bV7hjG7xrC75egTLBlbU
+qlicZYFkrHh9U253NVZLT0m2BB8QYIE1ryaynNsgDstTNVaLfOObHWD5AkvSr7G2Omy7xSyT5wMi
+viacHZ/vSYt+RYM1H5MGlpjFa4rar8C6CIKNPJLuq8DqaBmZNzQszx1KsMAq319jhfq8JVvT7L5q
+rFkqnSz0fkCAlQSWpGayuuQ3qh53eRR13POlDx9lWHvXbFc8iI5WSWCBVQNWmJ51U/031C8Ii9eI
+u9WsHe/XIlg0sCQ1lDXbR26NhMptmjjjWyNF65XMsrhHuOLAsoElqb4sVfgYf5vIuFT61IiZ92bA
+9sArnNEjsAZgNYPFUMSNyOldpbENrOLAklQb1tjT0lnj6H86462QWXaS/lxW7tNkYIGV68dZ90Gw
+xq48t5E5sYbp4v4zTWUO8kMta6g3X4NgPXP8jYcMM4OcqcECq74s7o2rDyxJYEkCSxJYksCSBJYk
+sCSBJQksSTVlfQMw8xqYcdf1zAAAAABJRU5ErkJggg==
+), q(
+iVBORw0KGgoAAAANSUhEUgAAASwAAACMBAMAAAA0OIkcAAAAAXNSR0IArs4c6QAAACpQTFRF////
+//8A/8yZM/8A/5n//5mZ/5kAmZmZAJn//zOZZjP//wAAADNmAAAArpS1RQAAAAFiS0dEAIgFHUgA
+AAAJcEhZcwAACxMAAAsTAQCanBgAAAJdSURBVHhe7dovTxxBGMfx0U0NaVJXg0cQTA2uBlFJ0DUY
+0qSmObUKQ5rgau4dNISzGGhS3e4Z0gTT57305tmbuZndZ5h92NvecP19EwLMzu58zN7+yZm6yExu
+wmYCSxNYmsDSBJYmsDSZW07e+OtW7E6evYi0pQ4EllTqQGBJpQ5k5JWf0l2ZrO9Eu9qI/oDVO7A0
+jc1amO7dWu/65CbviTKw4sDaftap7Uxe6+ZUTJrtWZ31p9Op++OrIAMLrE2whvexZFYLkg8ssLI9
+Z9Z7fgj7HYwErOgJbQxWMs/ycLDSgbVs3awd22t5rQ87YtLsHiyih4mtIvJjjjUn4m2TpQwssHyj
+sIb35lmxjoLLo2M1iwcsireABVbUVrCa9V2t4X/ACgPLB5amdbMObPvyWq8OxKTZLVbnNUiHlQgs
+sNqNwhreYYksPs8THxDNMyG528989nYVrBzHBRZYS42vYSXeUAasT8Z0kOEYWGAVyDpkSHDcqj+r
+ivat+FIZjjHrwnYuL/72Quz8MVYisMAqiqXuMn7JwnVYR8E9Ki/6+dh2MknFm4/BAgssRZe0iv+7
+d98akS6LMYtWHwYP/LviAbDA4raCtRgTTt4wv4VfjVzZvskrf7kSk2Z7lvQVriawfGBtnDW8GR96
+9/H2Mu8pafWtkdx6PQNLE1iaRmAZ8yK3arYZr0jDqn1g5QNLU/msRXX9Q5Zd12I/hakzd+43Rw9u
+hju7z6PL8jzecRlYLrDWzrI/5mVnX23z9tnUGQijaKMwFawgsP4XVoGBpQksTWBpAksTWJrA0lQo
+6y8aq8VkSErQ6gAAAABJRU5ErkJggg==
+), q(
+iVBORw0KGgoAAAANSUhEUgAAASwAAACMBAMAAAA0OIkcAAAAAXNSR0IArs4c6QAAACpQTFRF////
+//8A/8yZM/8A/5n//5mZ/5kAmZmZAJn//zOZZjP//wAAADNmAAAArpS1RQAAAAFiS0dEAIgFHUgA
+AAAJcEhZcwAACxMAAAsTAQCanBgAAAJXSURBVHhe7duhTsNAHMfxvgBiIcFh8Agyg5nDIJALGoMh
+JBgyVTWzkOAwewNCmMUALwCdWUhmuHdhd93/dm3/t/ZP1+22/L5qXI+7D6Ksa7ooCbKobMJmAksS
+WJLAkgSWJLAkRe8m/uD3O9sHP3uWkuZbCCwu30JgcfkWivid/9NHmKxPpY6kKfULVuXAktQ0a2aa
+0F5nVaLJx6wMrGxg7T7rWnfD7/V2zcbNtqzC/sPhkF48MTKwwNoEq363IbNykPLAAqu0bWZdmA9h
+P86Iwxq7n9CaYHmzLAsHyx9Y81bNaukO+L2uWmzc7AospaY9XeycjMQa08G5DCywbI2w6ndYnZXK
+HJZyjqyHde68PYJlA0vSTrDS/anc8BpYbmDZwJK0alZbd8Lvtd9m42bnWIXbIAWWJ7DAytcIq36d
+4Fh0nnv+QaSfCWfHy0SUvooGq4xDgbUFrLso2ssj3bHarJRj1oqJ5blDCRZYokJkdTJLC1jx4o9J
+f5pmxwxroOvzO58O2PrLWJ7AAisolrhHutRUiwqsc+ca1Wx639Vd9nyZw12wwNo9Vrw469JlYvNi
+pSwamNBTI9zbIlhgVWxXWLMx59ZIrIrZ9cytkRfdM7/5wwvbM0HI5LK4R7jSwAIrHFb9Rmbpo+Ud
+OzIutXhqpGy/ioElCSxJIbJGzuldp8QGVnlgSQqGZX4rNo9wZUq/V/3Fb/easBVmu6zEfKfTt13+
++THnojkzDSwTWI2xajamE8uO0ADzhH5udvF3dWDxs8ECa72BJQksSWBJAksSWJLAkhQo6w+vIOUl
+XH7JoQAAAABJRU5ErkJggg==
+), q(
+iVBORw0KGgoAAAANSUhEUgAAASwAAACMBAMAAAA0OIkcAAAAAXNSR0IArs4c6QAAACpQTFRF////
+//8A/8yZM/8A/5n//5mZ/5kAmZmZAJn//zOZZjP//wAAADNmAAAArpS1RQAAAAFiS0dEAIgFHUgA
+AAAJcEhZcwAACxMAAAsTAQCanBgAAAJESURBVHhe7dqhTsQwHMfxewEEIcFhziMIBoPDIJAXNAZD
+SDAENYUhJDjMvQEhYDHAC8BhCMnM9V04urVru99u/V/Y6IXf1wBdr/uYsa0wmCTZoG3C30SWJLIk
+kSWJLElkSbKs92fYC/5Yw2wlDa9OFg6vThYOrz5j4fUXrE1RqwfWq1JDaUpNyYqOLElds2amT3Ou
+vZjM5E0oI8uPrP/DejqGnWBFbfapYdXOPx6PzTe3QEYWWT2zkGWBkmYFkPbIIqu1pWUd6DewL3/Q
+sD6C17MuWDiXZeFkNURWVVeso1XYOlbUZm+0sJTKL37K/ItRs5Q5WMnIIsv22yxkWaBYViHzWfZI
+b6x985uALDeyJKXB2lBVZiCWVZzfFAz3w7KRRVZkvbHWtmFb2JQ7K5lcVm0bxD9/Q2SR1QMLa+a2
+qxXOctmysJxm74T+7LmV+zdkRUVWT6wiVZVrWRTrbDBYCZHuWFcstENJFlmiEmXZDC6Klempzk+5
+Pxaydq5gl5jizvZZKLLISoiFNeJuAGvfPKPqk56Pfjq8aEofHpFFVtjys7Lqqsv11+J67JA1xLdF
+soLIkpQi60bf1JpZe97WSHEL9MtLp90aMUtf38PuMMSf/eiw0L9wkeVGVtlfsbBGkrP6cE7uX+hQ
+lYksssrIik6Fr4ALN3EjqyWyJKXEmjRkWQ/4+BvW2NmqZGX6aVdVz8PT2lLOM3Ltg2FkkdUZqz4k
+SpVNGwecPszB1qlkkUVWCpEliSxJZEkiSxJZksiSlCjrG9lio4da73goAAAAAElFTkSuQmCC
+), q(
+iVBORw0KGgoAAAANSUhEUgAAASwAAACMBAMAAAA0OIkcAAAAAXNSR0IArs4c6QAAACpQTFRF////
+//8A/8yZM/8A/5n//5mZ/5kAmZmZAJn//zOZZjP//wAAADNmAAAArpS1RQAAAAFiS0dEAIgFHUgA
+AAAJcEhZcwAACxMAAAsTAQCanBgAAAJlSURBVHhe7do/T9tAHMbxvIEOFVK3LNkzIJYubFkYGBEz
+CwtC6lJl8tSlQmLr4oG9qmBlAd4AfxZUKUvuvWCffb473+M/P5uYJDzfhfh8OX+WJPaJ0fNaNmqa
+8DGRJYksSWRJIksSWZIK1tMd7B6/rWK2koZXJwuHVycLh1dPWHj9jjUpggZgPSg1kabUkqzWkSVp
+1azE9GquNWuTmTyFMrL8yPo8rNtT2BlWBLPPDSu4fhzH5sUfICOLrIFZyNKhZtahvu/7j1kvpZvC
+92X5EL+QNUtlZJHV0IaylFrM06Lyh3GqQdlJK1sFC+WzCjhZZDXWlpXJfFZxBrBOvsK+YUUweyxi
+FcNkkTU4C1k6JGBl1zeVhnuzxnpV5wixDsw3AVlktW8LWRX1Zo2dH30zIPiCqIgssgZk7ezBdptZ
+Jpfl784kJ+s9tnz/hqxWkdWFhTVN7Xdl/RiNvpSR7lg/1p6WOUtHlV8QyTMhWWSJ2ipWpD+0ztHC
+H+vNSlJ2vYKFdyjJIkvWNrB+HqUdz6vSp4/KrO+/Yb8wyJ2t8qpvmskiaxhWZD91C/030i98FtaI
+uwSsA3OPSlYpsiRtImvmbY1EKmyRO4utkabrtSxjTWp+FsmykSVpHVmXeulaVhxfOTKUNbmsi3+w
+vxjiz75xWOhfuHSHZGWRlfdRLKyR5DzrTeqbqpqe3cgiK23jWWH5zWhQX5Yqb8bI0u8CMrJQZEna
+VNZ1eC7tEWuK2cpuUi7t0Rxdy3laDd5YjiyyVsYKh0SpvKV35P/uwqlowEYWWWStQ2RJIksSWZLI
+kkSWJLIkrSnrDYkyqt1qtLB3AAAAAElFTkSuQmCC
+), q(
+iVBORw0KGgoAAAANSUhEUgAAASwAAACMBAMAAAA0OIkcAAAAAXNSR0IArs4c6QAAACpQTFRF////
+//8A/8yZM/8A/5n//5mZ/5kAmZmZAJn//zOZZjP//wAAADNmAAAArpS1RQAAAAFiS0dEAIgFHUgA
+AAAJcEhZcwAACxMAAAsTAQCanBgAAAJDSURBVHhe7dqxTsJQFMZxXsCBmLC5EF+AsLi4ufgAxtmF
+xZi4GKZOLsTEzYU3MITZBX0BLYsxYbHvYnuu5/a2PZf2gJFL+v0HxPbk3t9isaSdOMg6dQO7CSxN
+YGn6W9YyUeZbCCwp30JgSfkWCpW1oOSTHwuxV3k6NX32lflkYEmBpamGtXVvjumsSY7sG6y6wAKr
+YZZV2f98OjVvpvymKAMLrPW1hDXKupb3ehmJSdOGdSzv7w8ssHbD2r6b8Fme6Mbwi97aiwazlqW7
+RrDAsu0pK910nBWxzESstBWdzGVggWVrCaub1ZP3uuqK9UhhW8dKrwRPBVZJRqwVnwELrP9iqTty
+WHwgDNaKVyKZh2VzWEZmcw6DBVbILLsir++yKvdkxf09gQVWe1nDrIG8+eFQbCDLPBeI9GOxkcn0
+KwOrUWBtzNqk0zBZaUkui5glfUPpsG47nQPn/9HKMbDAosBSluT5/2l2WBGNWhadcY+BBRYXKMsk
+s0rfi1xkXY593dF5Zk2y7uXdTiZi1WmwhmDtF2v7Hollnhrx3CQyK3IuBvTTHAALLDmwNFlWX36S
+kgnj4hennHXGJrDAsgXJ4tWtTMqRSUXWlLFmWc/ybg8zseo0WBOw9ou1Vcn6v/2mFR5cBKsmsDS1
+jBXR6umazoHSc8H8mRzVzIEFFtUmFr2+yxvOY7HSdJJnVi/+VmzJJ+N8VHqMn15LG3Hz6rwwDZZp
+Xp0XplvHCi6wNIGlCSxNYGkCSxNYmsDSBJYmsDQFyvoB3p/CH52QwcYAAAAASUVORK5CYII=
+), q(
+iVBORw0KGgoAAAANSUhEUgAAASwAAACMBAMAAAA0OIkcAAAAAXNSR0IArs4c6QAAACpQTFRF////
+//8A/8yZM/8A/5n//5mZ/5kAmZmZAJn//zOZZjP//wAAADNmAAAArpS1RQAAAAFiS0dEAIgFHUgA
+AAAJcEhZcwAACxMAAAsTAQCanBgAAAJvSURBVHhe7duxT9tAFMdx/wHtgCqxZWFnQFm6sHVh6IiY
+WViqSl0qJk8sCKlbl/wHCIWVBZCYabxUlbL0/S/N3fnOz/a72K8HxIbfd0lin+4+i+3EcrLFS/WQ
+Ze+6xoSyrgFPFliawNK0QRZpi00EllRsIrCkYhMNlXVrk3f+uhW7k0cXRDvaiP6Kc4ElBZamDlZy
+90S//Vqf+uQH74oysOqBBVbPAqu1/mw2829+CjKwwOrojbBOTF/ktW5OxKTRjtWAdAcWWJthpfe1
+D+uz/RH2h21hrIL/QnsOVrTACnCw4oFVNl4W0fLUlLOD0bMKv7OUgQVWaPwsJ2MsYns8a8u0La91
+vCUmjY6wDtjlEawQWBtnpTdRsdz6vsbmNNbETsk+KU4QYIG1rjGyWrdBWqxIaawJu+L7DWDFAkvT
+s7Ompj158Q9Tsb06yxc5QbjfhKv96z1V5ls0WOsxVWD9H0vdfgLrW5a9byL5tgTW1MrYvLlnRe5Q
+ggVW/14bK7fHLfu0rG9LY62iarI8eoIAqwwsTeNkHbDvqHbc90PT0Wksu/vQss5NZ/KyH8/FGqOp
+DCywBsDKq6NuaV9z+6bJSu+HZe1EL4tg8cDSNFLWahu7NZJTu2XpdLdGutbrWWBJj3C5wAqBpWm4
+LOp8jH+XyaSoemrkynQpr3VxJSaNBgusUbESu2aHd0qLEFjdgaVpMKxFpCdnLcx/Ot2nXFi2qL4u
+U/tpMrDAajRcVv3AKtYdaVTb2RiaZfYv1e5/1Y/ycnNpVmE0WKa5NCtYrYVcc2nWF2QNLrA0gaUJ
+LE1gaQJLE1iawNIEliawNA2U9Q/tciQZGw/y3AAAAABJRU5ErkJggg==
+), q(
+iVBORw0KGgoAAAANSUhEUgAAASwAAACMBAMAAAA0OIkcAAAAAXNSR0IArs4c6QAAACpQTFRF////
+//8A/8yZM/8A/5n//5mZ/5kAmZmZAJn//zOZZjP//wAAADNmAAAArpS1RQAAAAFiS0dEAIgFHUgA
+AAAJcEhZcwAACxMAAAsTAQCanBgAAAJeSURBVHhe7dqxTsJAHMfxvoCDMXFzYWcwLi5sLgyOxNnF
+xZi4GKZOLsTEzYU3MAZWF/UFFBZiwuK9i3Dljn+5/3n9HxQK/r4Ttte7T0xKadNkUMmS0ICIkmTp
+WZeegAksSWBJAksSWJL+Aevrje2dP8wzWknjZweLj58dLD5+9gmLnz+ykMJpDawPpWrSlPoBq3Bg
+SSqbNTGNzFpnRTKD66wMrHxg/R/W6xXbNa9wRt8YlrN+t9s1H54YGVhgrZnFWSKqNGsBEg4ssIJt
+M+tc34R9ky2ENaR3aGWwvFmWhYPlD6xZZbEu99kOeYUz+ijMUmrcnpaSk9GwhmbnTAYWWLZVszhL
+RAJWJiMsRfash9Ukl0ewbGBJ2glWtr5pYfMaWDSwbGBJKot1cMJ2zCuc0Y08y3kM4rA8gQXW4rhV
+sxhKTJVk6fPc8wWR3RNO9odEpumvaLBCHBNYW8C6TZK9RSTdtjRL5cpYnieUYIElqnKshoaQedPi
+rDR3bKovlXRbjnXaYbuXsjyBBVZVWLwm1GP+IYvOYTXJb1S96F1r2kXbl97dAgus3WOl87MumybV
+H5ZmdbTMpv8ambdGuMsiWGAVbydYk23k5E2V23jmzB6NmFUeXtieeZMzum9Y3CtcWWDZwJq2KRZD
+iamvp679XZ3IuNT8rZHQegUDSxJYkqrLGs9/qEY2sIEVDixJ1WDpB5NjfQ6m1ERZvQHbJ69wRg/z
+11rfcrOh9vuAyBT73+o5h+vAAiua5RwV19CcXt4NNJXbyQwFiwQWWBsLLElgSQJLEliSwJIElqSK
+sn4BF76oQM/R94AAAAAASUVORK5CYII=
+), q(
+iVBORw0KGgoAAAANSUhEUgAAASwAAACMBAMAAAA0OIkcAAAAAXNSR0IArs4c6QAAACpQTFRF////
+//8A/8yZM/8A/5n//5mZ/5kAmZmZAJn//zOZZjP//wAAADNmAAAArpS1RQAAAAFiS0dEAIgFHUgA
+AAAJcEhZcwAACxMAAAsTAQCanBgAAAJ0SURBVHhe7dwxT9wwGMZxf4BjQJW6dWFnQCwsbCwMHRFz
+FxZUiaViysRSIbF1uW+Aqt7ahSIxw91yqsRSf5fmbF7HiV/jvLkkMsfznw7HcX4M4ZIoQs2zTKUm
+MD2oai+lJvGJ3QNLEliSurBsSnXfN1n3pcGSBJakcVhPd2x/+N0is7U0fnWw+PjVweLjVy9Z/Pod
+SymCRmDda70jTet/YLUOLElDs0rTko511CaavMvKwKoH1vth/T5jO+cVweyvxAqOP51O6cMPRgYW
+WCOzOEuHsmY1IOnAAivZW2Z9Njdhf70Rj7Xw79CGYEVzLAcHKx5YLw3F+rLN9pFXBLM/pVlaP1+u
+KryTkVgL2vgiAwssV98sztIhAcvKPJb2tozDOva+HsFygSVpI1j2+FRjeASWH1gusCQNxfqwz7bH
+K4LZh3VW8BgkYEUCC6zmvL5ZDKVL+bHoPI/8gbD3hOX2lIhaXUWDleJQYL0B1oVSW02kP7Y2y3LM
+WgWxIk8owQJLVI6sw9rSAlZR/TL2p+f6WI118J3tijeVs294ViSwwMqFxWtS3dClpq4KWMfeNao5
+6LeTVaeXsczmE7DA2jxWUZ11dpnCfOiVRQNLemuE+1oEC6yWbQqrHPMejRQ6zK1nHo3Qga5/st3y
+rHL2zCxG82bE4l7hsoEFVhYsXiPOIndeb9eTcenqrZHU8VoGliSwJOXImnmn9zrNXWClA0tSLiy7
+V+GDGqxfzS22Rx5Sn72of9EGh1OrJuZfI2xVl8s6fJvMBRZYtgFY8x5a0JkVHZgb08R80LWN3FSw
+wKLA6j3HahNYYAkCa7DAkgSWJLAkZcr6D8o1Y7ROrmorAAAAAElFTkSuQmCC
+), q(
+iVBORw0KGgoAAAANSUhEUgAAASwAAACMBAMAAAA0OIkcAAAAAXNSR0IArs4c6QAAACpQTFRF////
+//8A/8yZM/8A/5n//5mZ/5kAmZmZAJn//zOZZjP//wAAADNmAAAArpS1RQAAAAFiS0dEAIgFHUgA
+AAAJcEhZcwAACxMAAAsTAQCanBgAAAJqSURBVHhe7dsxT9tAGMZxfwA6oErdWLIzoCxd2LIwdESd
+WVgQUheUyVOXqBJbl3wDhDp3gUrMkEioquQl913InXP2e5fXuXtj7Fyq579A7Mvdb3ESHySbJVkW
+GrCbwJIElqQQ6ynLDgJDuggsSWBJSpX1YOJPvjywPfKjlylpTROBxdU0EVhcTRNl/Mrb9Jgm649S
+A2lKLcCKDixJXbOWpr92rVFMdvAxKwPLDaz/n3Wpu+LX+n3Jxo2uWGvrT6dT+8tPRgYWWLtgte86
+ZZYHCQcWWMH2lvXF3IH9cw9a1ty7PeuCxUdZFRyshsCqe2/Woe4Tv9bFIRs3OsRSqhjrcvdiNCxl
+T9YysMCq6oTVvqNIVilzWdWZ3lhn9pUALBpYktJgHak6eyCWVa5v8w73w6oCC6zIOmcNdSf84h+H
+bKfuNW2jrLVtEHf9hsACqy+WrFOjINPl+8IiLe8J3dEbW+3fgBUVWD2xylRdYWRRrG9Z9sFH0mNd
+sbgdSrDAEpUoq8rioli5GUoeFe4xy5rovvMLfp6weaNdFhdYYKXGat8twzqzn1HNojfnuq/jpszp
+c7DA8tt/Vl5fdYX5WV6PHbIG/NsiWF5gSdpH1sjZGinfAt2KlbPaGrnX3fFr/bhnWxt9a6YuWdy/
+cIFFA0u3a1aryOyDDdG/0HHVJrDAWgVWdMq/Bdy6GQ2sQGBJSok1a6j8XvUzv+Yv/jl0tFqxcqVe
+3S3QTHdAnkY+Iy/MFz/JIz+wwOqWtX3u7HPCYob2yjItGg+Q5u7JDUPBAitVFtfyhSE0JFTrCZjA
+kgSWJLAkgSUJrJ4DS9Ib5zhsvPg8HpYAAAAASUVORK5CYII=
+), q(
+iVBORw0KGgoAAAANSUhEUgAAASwAAACMBAMAAAA0OIkcAAAAAXNSR0IArs4c6QAAACpQTFRF////
+//8A/8yZM/8A/5n//5mZ/5kAmZmZAJn//zOZZjP//wAAADNmAAAArpS1RQAAAAFiS0dEAIgFHUgA
+AAAJcEhZcwAACxMAAAsTAQCanBgAAAKcSURBVHhe7dshb9tAGIfxw9UKqkljIeEBVcjIWEhBYTVc
+UjJNGpmCjEaqSWUjBpMGq2p4pK1UvCVkmhSS+y7znXO+O/s9n99z0rjR/wFrbJ/vfgV2EqsTi0Em
+YgP2E1icwOIEFiewOIHFSdzr6IN/7ske6NFFkltoIrCoQhOBRRWaSNArp/QwTNajlGNuUq7B6hxY
+nHbNKkx/zVqzLpnBE1IGlh9Yh8+6Un2g1/p1RUaNrliN9fM8Ny++ETKwwNoHq38fo6xz/bnvH81a
+1j4UbpflQ/yarJmSgQVWpBfKknI1V2X1i3GiQeVBK9sFi8pnVXCwwIrWlVXKfFZ1xGGdqN7Qa12e
+kFGjeaxqN1hg7YfVv1F3Vrm+qba7N2ukZ3W2KNaZuROABVb3DpAVqDdr5Lzpmx2MG0QgsMB6BtZU
+dUov/npKduqzTC7LfzpTHGz32DbPb8DqFFjJLHbvUlmfhDiuI919/VhTLXOmzoI3iOI7IVhgsToo
+VqYvWmdr5e/rzSqSdr6KRT+hBAssXofA+nyhej8PpQ9fGNa16gu97NtrstpouSn8oRkssJ6Hldmr
+bqV/ZvoFwerfDcE6M59RwaoFFqeXyJp5j0Yy2Wy1cVaPRmLrdaxkjVveFsGygcVpMCwhqnNv9NSt
+rDz/7siorEmx7lS39Mpf78hu21jUn3DpzsECazgsXj+EPUuII+e73ri9iWxp4QYWWENiuUn7DCLO
+aqbPWi8abYs1p9+CY+mzwOoYWJy2xiruDkfOprRX4jrhv00GWfrf3zThZ3P84qmNtbTfTJtrOd9W
+y9/A2aoHFli7ZaVnLqly6qXZjA+ldtjAAgusaMU9onotxKvwwPTA4gQWpxRWmRDp50ZLnxosTmBx
+Gihrp4HF6T8ynH+tp6Or0wAAAABJRU5ErkJggg==
+) ];
+
+use Image::Term256Color;
+use MIME::Base64;
+use Time::HiRes qw( usleep gettimeofday );
+use Getopt::Long;
+use Pod::Usage;
+
+my $options = {};
+GetOptions( "scale=f" => \$options->{scale_r}, 
+            "x_scale=i" => \$options->{scale_x},
+            "no_scale" => \$options->{no_scale},
+            "loop_times=i" => \$options->{loop_t},
+            "run_seconds=i" => \$options->{run_s},
+            "help" => \$options->{help}
+          );
+
+if( $options->{help} ){
+  print_usage();
+}
+
+my $max_width = `tput cols`;
+$max_width = sprintf("%u" , ($max_width / 2));
+
+sub print_usage {
+  pod2usage( { -message => $_[0] , -exitval => 1 , -verbose => 0 } );
+}
+
+# Scale the animation per options set
+{
+  my $proc_img;
+  my $convfunc;
+
+  if( $options->{scale_r} ){
+    $convfunc = sub { 
+      return Image::Term256Color::convert( decode_base64($frames->[$_[0]]),
+                                           { scale_ratio => $options->{scale_r} } );
+    };
+  } elsif( $options->{scale_x} ){
+    $convfunc = sub { 
+      return Image::Term256Color::convert( decode_base64($frames->[$_[0]]),
+                                           { scale_x => $options->{scale_x} } );
+    };
+  } elsif( $options->{no_scale} ){
+    $convfunc = sub { 
+      return Image::Term256Color::convert( decode_base64($frames->[$_[0]]) ); 
+    };
+  } else {
+    $convfunc = sub { 
+      return Image::Term256Color::convert( decode_base64($frames->[$_[0]]) ,
+                                           { scale_x => $max_width } ); 
+    };
+  }
+  
+  $proc_img = sub {
+    my $ascii = $convfunc->($_[0]);
+
+    if( !$ascii ){
+      print_usage("Error: Invalid image data or file.\n");
+    }
+
+    return $ascii . "\n";
+  };
+
+  for(0..11){
+    $frames->[$_] = $proc_img->($_);
+  }
+}
+
+# Loop the animation per options set
+my $loopcheck;
+
+if( $options->{loop_t} ){
+  $loopcheck = sub {
+    if( $options->{loop_t} ){
+      $options->{loop_t}--;
+      return 1;
+    } else {
+      return 0;
+    }
+  };
+} elsif( $options->{run_s} ){
+  my $runtime = gettimeofday();
+  $loopcheck = sub {
+    if( (scalar(gettimeofday()) - $runtime) < $options->{run_s} ){
+      return 1;
+    } else {
+      return 0;
+    }
+  };
+} else {
+  $loopcheck = sub {
+    return 1;
+  };
+}
+
+
+while($loopcheck->()){
+  my $frame = 0;
+  while($frame < 12){
+    print "\033[2J";
+    print "\033[0;0H";
+    print $frames->[$frame++];
+    usleep(70000);
+  }
+}
+
+exit 0;
+
+__END__
+ 
+=head1 NAME
+ 
+nyan - Your very own animated terminal Nyancat!
+ 
+=head1 SYNOPSIS
+ 
+nyan [options]
+ 
+ Options:
+   --help|-h            brief help message
+   --scale|-s           scale image by the given ratio
+   --x_scale|-x         scale image to x 'pixels' wide
+   --no_scale|-n        do not scale the image at all
+   --loop_times|-l      number of times to loop the animation
+   --run_seconds|-r     number of seconds to run the animation
+
+If Nyancat is larger than the current terminal in columns, it will be
+automatically scaled to fit unless specified.
+
+If no options are specified, Nyancat will loop forever.
+ 
+=head1 OPTIONS
+ 
+=over 8
+ 
+=item --help|-h
+ 
+Prints a brief help message and exits.
+ 
+=item --scale|-s
+ 
+Scales Nyancat by the provided decimal ratio before
+printing.  Superscedes --x_scale.
+ 
+=item --x_scale|-x
+ 
+Scales Nyancat width to match the provided integer
+in 'pixels'.  Scales the image height proportionally.
+Superscedes --no_scale.
+
+=item --no_scale|-n
+
+Disables automatic scaling of Nyancat.
+ 
+=item --loop_times|-l
+
+Number of times to loop the Nyancat animation.
+
+=item --run_seconds|-r
+
+Number of seconds to run the Nyancat animation.
+
+=back
+ 
+=head1 DESCRIPTION
+ 
+nyan a part of the L<Image::Term256Color> distribution and
+includes Nyancat animation frames within the script for enjoyment
+on 256 color terminals.
+
+=head1 EXAMPLES
+
+Run it already:
+
+    nyan
+ 
+=cut
+
