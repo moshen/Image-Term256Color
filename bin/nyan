@@ -214,31 +214,21 @@ sub print_usage {
 # Scale the animation per options set
 {
   my $proc_img;
-  my $convfunc;
+  my $img_opts;# = (decode_base64($frames->[$_[0]]));
 
   if( $options->{scale_r} ){
-    $convfunc = sub { 
-      return Image::Term256Color::convert( decode_base64($frames->[$_[0]]),
-                                           { scale_ratio => $options->{scale_r} } );
-    };
+    $img_opts = { scale_ratio => $options->{scale_r} };
   } elsif( $options->{scale_x} ){
-    $convfunc = sub { 
-      return Image::Term256Color::convert( decode_base64($frames->[$_[0]]),
-                                           { scale_x => $options->{scale_x} } );
-    };
+    $img_opts = { scale_x => $options->{scale_x} };
   } elsif( $options->{no_scale} ){
-    $convfunc = sub { 
-      return Image::Term256Color::convert( decode_base64($frames->[$_[0]]) ); 
-    };
+    $img_opts = {};
   } else {
-    $convfunc = sub { 
-      return Image::Term256Color::convert( decode_base64($frames->[$_[0]]) ,
-                                           { scale_x => $max_width } ); 
-    };
+    $img_opts = { scale_x => $max_width };
   }
   
   $proc_img = sub {
-    my $ascii = $convfunc->($_[0]);
+    my $ascii = Image::Term256Color::convert( decode_base64($frames->[$_[0]]) ,
+                                              $img_opts );
 
     if( !$ascii ){
       print_usage("Error: Invalid image data or file.\n");
@@ -279,12 +269,14 @@ if( $options->{loop_t} ){
   };
 }
 
+# Clear the screen
+print "\033[2J";
 
+# Animate!
 while($loopcheck->()){
   my $frame = 0;
   while($frame < 12){
-    print "\033[2J";
-    print "\033[0;0H";
+    print "\033[0;0H"; # Jump to 0,0
     print $frames->[$frame++];
     usleep(70000);
   }
@@ -344,7 +336,8 @@ Number of times to loop the Nyancat animation.
 
 =item --run_seconds|-r
 
-Number of seconds to run the Nyancat animation.
+Number of seconds to run the Nyancat animation. 
+Note:  This isn't exact.
 
 =back
  
