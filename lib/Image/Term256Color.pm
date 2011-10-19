@@ -287,7 +287,7 @@ sub convert_from_gdimg {
 
 =head1 EXAMPLES
 
-Please look at L<img2term> bundled with this distribution.
+Please look at L<img2term> and L<nyan> bundled with this distribution.
 
 =head1 AUTHOR
 
