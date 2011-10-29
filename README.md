@@ -48,6 +48,9 @@ or
 
     cpanm Image::Term256Color
 
+CPAN may require `--force` since the GD modules tests include actual display
+tests which will often fail.
+
 To install this module from source, run the following commands:
 
     perl Build.PL
@@ -83,6 +86,14 @@ Results in something like:
 
 ![Termcat](http://i.imgur.com/uF2f8.png)
 
+Using the included nyan script:
+
+    nyan -r 5 -n
+
+Results in something like:
+
+![Nyancat](http://i.imgur.com/XRyIU.gif)
+
 ## SUPPORT AND DOCUMENTATION
 
 After installing, you can find documentation for this module with the
@@ -90,6 +101,7 @@ perldoc commands.
 
     perldoc Image::Term256Color
     perldoc img2term
+    perldoc nyan
 
 You can also look for information at:
 
@@ -111,7 +123,7 @@ You can also look for information at:
 
 ## LICENSE AND COPYRIGHT
 
-Copyright (C) 2011 Colin
+Copyright (C) 2011 Colin Kennedy
 
 This program is free software; you can redistribute it and/or modify it
 under the terms of either: the GNU General Public License as published
