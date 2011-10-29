@@ -13,11 +13,11 @@ Image::Term256Color - Display images in your 256 color terminal! (kinda)
 
 =head1 VERSION
 
-Version 0.01
+Version 0.04
 
 =cut
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 =head1 SYNOPSIS
 
@@ -220,6 +220,10 @@ sub convert {
       }
       $gdimg = GD::Image->new($width  * $ratio,
                               $height * $ratio);
+      if( $origimg->transparent() >= 0 ){
+        $gdimg->colorAllocate($origimg->rgb($origimg->transparent()));
+        $gdimg->transparent($origimg->transparent());
+      }
       $gdimg->copyResized($origimg, 0,0,0,0,
                           $width  * $ratio,
                           $height * $ratio,
@@ -260,17 +264,36 @@ sub convert_from_gdimg {
   }
   
   my @termimg;
+  my $transparent = $img->transparent();
+
+  my $color_check;
+  if( $transparent >= 0 ){
+    $color_check = sub {
+      my( $j, $i ) = @_;
+      my $ptotest = $img->getPixel($j,$i);
+      if( $img->colorExact( $img->rgb($ptotest) ) < 0 ){
+        return -1;
+      } else {
+        return $colorlookup[$pal->colorClosest($img->rgb($ptotest))];
+      }
+    };
+  } else {
+    $color_check = sub {
+      my( $j, $i ) = @_;
+      my $ptotest = $img->getPixel($j,$i);
+      return $colorlookup[$pal->colorClosest($img->rgb($ptotest))];
+    };
+  }
   
   for( my $i=0; $i<$height; $i++ ){
     my $rowstring;
     my $localstring; # Used to group spaces of the same color
     my $curcolor = 0;
     for( my $j=0; $j<$width; $j++ ){
-      my $ptotest = $img->getPixel($j,$i);
-      my $newcolor = $colorlookup[$pal->colorClosest($img->rgb($ptotest))];
+      my $newcolor = $color_check->($j, $i);
 
       if( $newcolor != $curcolor ){
-        $rowstring .= bg( $curcolor , $localstring);
+        $rowstring .= $curcolor >= 0 ? bg( $curcolor , $localstring) : clear() . $localstring;
         $curcolor = $newcolor;
         $localstring = '';
       }
@@ -278,7 +301,7 @@ sub convert_from_gdimg {
       $localstring .= $char;
     }
 
-    $rowstring .= bg( $curcolor , $localstring);
+    $rowstring .= $curcolor >= 0 ? bg( $curcolor , $localstring) : clear() . $localstring;
     push(@termimg, $rowstring);
   }
 
@@ -287,7 +310,7 @@ sub convert_from_gdimg {
 
 =head1 EXAMPLES
 
-Please look at L<img2term> bundled with this distribution.
+Please look at L<img2term> and L<nyan> bundled with this distribution.
 
 =head1 AUTHOR
 

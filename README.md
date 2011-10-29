@@ -1,11 +1,44 @@
 # Image-Term256Color
 
+Image-Term256Color is a perl module for converting image data into 256 color
+terminal ascii.  When output to a compatible terminal, such as the ones
+reflected in the following table ( [from the Term::ExtendedColor docs](
+https://metacpan.org/module/Term::ExtendedColor) ):
+
+    Terminal    256 colors
+    ----------------------
+    aterm               no
+    eterm              yes
+    gnome-terminal     yes
+    konsole            yes
+    lxterminal         yes
+    mrxvt              yes
+    roxterm            yes
+    rxvt                no
+    rxvt-unicode       yes *
+    sakura             yes
+    terminal           yes
+    terminator         yes
+    vte                yes
+    xterm              yes
+    iTerm2             yes
+    Terminal.app        no
+
+    GNU Screen         yes
+    tmux               yes
+    TTY/VC              no
+
+    * Previously needed a patch. Full support was added in version 9.09
 
 
 ## INSTALLATION
 
 This module requires [GD](https://metacpan.org/module/GD), which requires
 libgd2 to be installed on your system with the development headers available.
+
+To install libgd2 on Mac OS X:
+
+    brew install gd
 
 To install this module from cpan:
 
@@ -14,6 +47,9 @@ To install this module from cpan:
 or
 
     cpanm Image::Term256Color
+
+CPAN may require `--force` since the GD modules tests include actual display
+tests which will often fail.
 
 To install this module from source, run the following commands:
 
@@ -50,13 +86,22 @@ Results in something like:
 
 ![Termcat](http://i.imgur.com/uF2f8.png)
 
+Using the included nyan script:
+
+    nyan -r 5 -n
+
+Results in something like:
+
+![Nyancat](http://i.imgur.com/XRyIU.gif)
+
 ## SUPPORT AND DOCUMENTATION
 
 After installing, you can find documentation for this module with the
-perldoc command.
+perldoc commands.
 
     perldoc Image::Term256Color
     perldoc img2term
+    perldoc nyan
 
 You can also look for information at:
 
@@ -78,7 +123,7 @@ You can also look for information at:
 
 ## LICENSE AND COPYRIGHT
 
-Copyright (C) 2011 Colin
+Copyright (C) 2011 Colin Kennedy
 
 This program is free software; you can redistribute it and/or modify it
 under the terms of either: the GNU General Public License as published

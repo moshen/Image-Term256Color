@@ -8,7 +8,7 @@ my $builder = Module::Build->new(
     license             => 'perl',
     dist_author         => q{Colin Kennedy <moshen@cpan.org>},
     dist_version_from   => 'lib/Image/Term256Color.pm',
-    script_files        => 'bin/img2term',
+    script_files        => [ 'bin/img2term', 'bin/nyan' ],
     build_requires => {
         'Test::More' => 0,
     },

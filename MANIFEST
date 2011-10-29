@@ -2,6 +2,7 @@ Build.PL
 Changes
 lib/Image/Term256Color.pm
 bin/img2term
+bin/nyan
 MANIFEST			This list of files
 README.md
 t/00-load.t
