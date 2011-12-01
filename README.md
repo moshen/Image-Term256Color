@@ -94,6 +94,10 @@ Results in something like:
 
 ![Nyancat](http://i.imgur.com/XRyIU.gif)
 
+If you just want to have an animated terminal Nyancat, I've ported the 
+animation script [in this gist](https://gist.github.com/1417991) to be
+a standalone script.
+
 ## SUPPORT AND DOCUMENTATION
 
 After installing, you can find documentation for this module with the
