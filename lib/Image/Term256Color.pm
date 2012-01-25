@@ -160,7 +160,7 @@ foreach my $k ( keys( %{$termcolors} )){
 
 =head1 SUBROUTINES/METHODS
 
-=head2 convert 
+=head2 convert
 
 =head4 Image::Term256Color::convert( $filename , \%options );
 

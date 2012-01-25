@@ -212,15 +212,15 @@ while($loopcheck->()){
 exit 0;
 
 __END__
- 
+
 =head1 NAME
- 
+
 nyan - Your very own animated terminal Nyancat!
- 
+
 =head1 SYNOPSIS
- 
+
 nyan [options]
- 
+
  Options:
    --help|-h            brief help message
    --scale|-s           scale image by the given ratio
@@ -234,22 +234,22 @@ If Nyancat is larger than the current terminal in columns, it will be
 automatically scaled to fit unless specified.
 
 If no options are specified, Nyancat will loop forever.
- 
+
 =head1 OPTIONS
- 
+
 =over 8
- 
+
 =item --help|-h
- 
+
 Prints a brief help message and exits.
- 
+
 =item --scale|-s
- 
+
 Scales Nyancat by the provided decimal ratio before
 printing.  Superscedes --x_scale.
- 
+
 =item --x_scale|-x
- 
+
 Scales Nyancat width to match the provided integer
 in 'pixels'.  Scales the image height proportionally.
 Superscedes --no_scale.
@@ -257,14 +257,14 @@ Superscedes --no_scale.
 =item --no_scale|-n
 
 Disables automatic scaling of Nyancat.
- 
+
 =item --loop_times|-l
 
 Number of times to loop the Nyancat animation.
 
 =item --run_seconds|-r
 
-Number of seconds to run the Nyancat animation. 
+Number of seconds to run the Nyancat animation.
 Note:  This isn't exact.
 
 =item --utf8|-u
@@ -274,9 +274,9 @@ resolution in the terminal.  May not display properly and
 depends on the font used.
 
 =back
- 
+
 =head1 DESCRIPTION
- 
+
 nyan a part of the L<Image::Term256Color> distribution and
 includes Nyancat animation frames within the script for enjoyment
 on 256 color terminals.
@@ -286,6 +286,6 @@ on 256 color terminals.
 Run it already:
 
     nyan
- 
+
 =cut
 

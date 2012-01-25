@@ -42,9 +42,9 @@ sub proc_print {
     } else {
       $ascii = Image::Term256Color::convert( $image->gd2() , $options );
     }
-      
+
   }
-  
+
   if( !$ascii ){
     print_usage("Error: Invalid image data or file.\n");
   }
@@ -77,15 +77,15 @@ if( -t STDIN and not @ARGV ){
 exit 0;
 
 __END__
- 
+
 =head1 NAME
- 
+
 img2term - Display images in your 256 color terminal (kinda)
- 
+
 =head1 SYNOPSIS
- 
+
 img2term [options] [file...]
- 
+
  Options:
    --help|-h            brief help message
    --scale|-s           scale image by the given ratio
@@ -97,22 +97,22 @@ Image data can be piped to STDIN in place of providing a file.
 
 Images larger than the current terminal in columns will be
 automatically scaled to fit unless specified.
- 
+
 =head1 OPTIONS
- 
+
 =over 8
- 
+
 =item --help|-h
- 
+
 Prints a brief help message and exits.
- 
+
 =item --scale|-s
- 
+
 Scales the provided image by the provided decimal ratio before
 printing.  Superscedes --x_scale.
- 
+
 =item --x_scale|-x
- 
+
 Scales the provided image width to match the provided integer
 in 'pixels'.  Scales the image height proportionally.
 Superscedes --no_scale.
@@ -128,9 +128,9 @@ resolution in the terminal.  May not display properly and
 depends on the font used.
 
 =back
- 
+
 =head1 DESCRIPTION
- 
+
 img2term is a part of the L<Image::Term256Color> distribution and
 acts as a thin wrapper around the module to display image data on
 256 color terminals.
@@ -140,6 +140,6 @@ acts as a thin wrapper around the module to display image data on
 Display a classy octocat:
 
     curl http://octodex.github.com/images/class-act.jpg | img2term | less -R
- 
+
 =cut
 
