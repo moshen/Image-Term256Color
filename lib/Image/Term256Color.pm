@@ -185,6 +185,11 @@ before converting to colored text.
 scale_x represents the number of characters wide the resulting encoded
 image will be.  This option scales the image height proportionally.
 
+=item * utf8
+
+utf8 can either be 0 or 1.  This option enables utf8 'block'
+characters that effectively double the resolution.
+
 =back
 
 Returns a color coded string with newlines in scalar context and an
@@ -198,8 +203,8 @@ is an error with the provided image.
 sub convert {
   my ($img, $opts) = @_;
 
-  my $char = 0;
   my $gdimg;
+  my $utf8 = 0;
 
   if( $opts ){
     if( $opts->{scale_ratio} || $opts->{scale_x} ){
@@ -231,9 +236,8 @@ sub convert {
 
     }
 
-    if( $opts->{string_to_colorize} ){
-      $char = $opts->{string_to_colorize};
-
+    if( $opts->{utf8} ){
+      $utf8 = 1;
     }
   }
 
@@ -243,8 +247,8 @@ sub convert {
       return wantarray ? () : 0;
     }
   }
-  
-  return convert_from_gdimg( $gdimg, $char);
+
+  return convert_from_gdimg( $gdimg, $utf8 );
 }
 
 # Undocumented functions
@@ -254,16 +258,75 @@ sub get_term256color {
   return $colorlookup[$pal->colorClosest( $r , $g , $b )];
 }
 
-sub convert_from_gdimg {
-  my ($img, $char) = @_;
+sub gdimg_to_ansi {
+  my($img, $color_check) = @_;
 
+  my @termimg;
+  my $char = '  ';
   my ($width, $height) = $img->getBounds();
 
-  unless( $char ){
-    $char = '  ';
+  for( my $i=0; $i<$height; $i++ ){
+    my $rowstring;
+    my $localstring; # Used to group spaces of the same color
+    my $curcolor = 0;
+    for( my $j=0; $j<$width; $j++ ){
+      my $newcolor = $color_check->($j, $i);
+
+      if( $newcolor != $curcolor ){
+        $rowstring .= $curcolor >= 0 ? bg( $curcolor , $localstring) : clear() . $localstring;
+        $curcolor = $newcolor;
+        $localstring = '';
+      }
+
+      $localstring .= $char;
+    }
+
+    $rowstring .= $curcolor >= 0 ? bg( $curcolor , $localstring) : clear() . $localstring;
+    push(@termimg, $rowstring);
   }
-  
+
+  return @termimg;
+}
+
+sub gdimg_to_utf8 {
+  my($img, $color_check) = @_;
+
   my @termimg;
+  my ($width, $height) = $img->getBounds();
+
+  for( my $i=0; $i<$height; $i+=2 ){
+    my $rowstring;
+    my $localstring; # Used to group spaces of the same color
+    my $curcolor = 0;
+    for( my $j=0; $j<$width; $j++ ){
+      my $colortop = $color_check->($j, $i);
+      my $colorbottom = $color_check->($j, $i+1);
+
+      if( $colortop == $colorbottom ){
+        $rowstring .= $colortop >= 0 ? bg( $colortop, ' ') : clear() . ' ';
+      }
+      elsif( $colortop != $colorbottom ){
+        if( $colortop >= 0 && $colorbottom >= 0 ){
+          $rowstring .= bg( $colorbottom, fg( $colortop, '▀' ));
+        }
+        elsif( $colortop >= 0 && $colorbottom < 0 ){
+          $rowstring .= clear() . fg( $colortop, '▀' );
+        }
+        elsif( $colortop < 0 && $colorbottom >= 0 ){
+          $rowstring .= clear() . fg( $colorbottom, '▄' );
+        }
+      }
+    }
+
+    push(@termimg, $rowstring);
+  }
+
+  return @termimg;
+}
+
+sub convert_from_gdimg {
+  my ($img, $utf8) = @_;
+
   my $transparent = $img->transparent();
 
   my $color_check;
@@ -284,26 +347,8 @@ sub convert_from_gdimg {
       return $colorlookup[$pal->colorClosest($img->rgb($ptotest))];
     };
   }
-  
-  for( my $i=0; $i<$height; $i++ ){
-    my $rowstring;
-    my $localstring; # Used to group spaces of the same color
-    my $curcolor = 0;
-    for( my $j=0; $j<$width; $j++ ){
-      my $newcolor = $color_check->($j, $i);
 
-      if( $newcolor != $curcolor ){
-        $rowstring .= $curcolor >= 0 ? bg( $curcolor , $localstring) : clear() . $localstring;
-        $curcolor = $newcolor;
-        $localstring = '';
-      }
-      
-      $localstring .= $char;
-    }
-
-    $rowstring .= $curcolor >= 0 ? bg( $curcolor , $localstring) : clear() . $localstring;
-    push(@termimg, $rowstring);
-  }
+  my @termimg = $utf8 ? gdimg_to_utf8($img, $color_check) : gdimg_to_ansi($img, $color_check);
 
   return wantarray ? @termimg : join("\n", @termimg);
 }
