@@ -117,11 +117,12 @@ use Getopt::Long;
 use Pod::Usage;
 
 my $options = {};
-GetOptions( "scale=f" => \$options->{scale_r}, 
+GetOptions( "scale=f" => \$options->{scale_ratio},
             "x_scale=i" => \$options->{scale_x},
             "no_scale" => \$options->{no_scale},
             "loop_times=i" => \$options->{loop_t},
             "run_seconds=i" => \$options->{run_s},
+            "utf8" => \$options->{utf8},
             "help" => \$options->{help}
           );
 
@@ -130,7 +131,7 @@ if( $options->{help} ){
 }
 
 my $max_width = `tput cols`;
-$max_width = sprintf("%u" , ($max_width / 2));
+$max_width = $options->{utf8} ? $max_width : sprintf("%u" , ($max_width / 2));
 
 sub print_usage {
   pod2usage( { -message => $_[0] , -exitval => 1 , -verbose => 0 } );
@@ -140,16 +141,18 @@ sub print_usage {
 {
   my $img_opts;
 
-  if( $options->{scale_r} ){
-    $img_opts = { scale_ratio => $options->{scale_r} };
+  if( $options->{scale_ratio} ){
+    $img_opts->{scale_ratio} = $options->{scale_r};
   } elsif( $options->{scale_x} ){
-    $img_opts = { scale_x => $options->{scale_x} };
+    $img_opts->{scale_x} = $options->{scale_x};
   } elsif( $options->{no_scale} ){
-    $img_opts = {};
+    # Do nothing...
   } else {
-    $img_opts = { scale_x => $max_width };
+    $img_opts->{scale_x} = $max_width;
   }
-  
+
+  $img_opts->{utf8} = $options->{utf8};
+
   my $proc_img = sub {
     my $ascii = Image::Term256Color::convert( decode_base64($frames->[$_[0]]) ,
                                               $img_opts );
@@ -225,6 +228,7 @@ nyan [options]
    --no_scale|-n        do not scale the image at all
    --loop_times|-l      number of times to loop the animation
    --run_seconds|-r     number of seconds to run the animation
+   --utf8|-u            use utf8 half-blocks for pixels
 
 If Nyancat is larger than the current terminal in columns, it will be
 automatically scaled to fit unless specified.
@@ -262,6 +266,12 @@ Number of times to loop the Nyancat animation.
 
 Number of seconds to run the Nyancat animation. 
 Note:  This isn't exact.
+
+=item --utf8|-u
+
+Uses utf8 'half-block' characters to effectlivy double the
+resolution in the terminal.  May not display properly and
+depends on the font used.
 
 =back
  
