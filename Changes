@@ -6,3 +6,12 @@ Revision history for Image-Term256Color
 0.02    09-26-2011
         Cleaned up tests and installation, expanded docs
 
+0.03    09-28-2011
+        Fixed img2term width bug, removed broken tests
+
+0.04    10-29-2011
+        Added some transparency support, Nyancat script
+
+0.05    01-24-2012
+        Added a utf8 output option
+
